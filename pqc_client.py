@@ -21,6 +21,7 @@ class PQCClient:
     def print_separator(self):
         print("================================================")
 
+    # Function that handles the messages received from the server
     def receive_messages(self, client_socket):
         while True:
             try:
@@ -64,6 +65,7 @@ class PQCClient:
                 )
                 break
 
+    # Function used to send messages to the server
     def send_message(self, client_socket):
         while True:
             print(
@@ -78,23 +80,32 @@ class PQCClient:
             client_socket.send(cipher_text)
 
     def run_client(self):
+        # Socket creation and connection to the server
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((self.server_ip, self.server_port))
         print(f"Client connected to server: [{self.server_ip}:{self.server_port}]")
         self.print_separator()
 
+        # Server PQC Key Exchange Mechanism
         client_kem = oqs.KeyEncapsulation(self.kem_alg)
+
+        # Generate a key pair and send the public key to the server
         public_key = client_kem.generate_keypair()
-        # print("Public Key en Client: ", public_key.hex())
         client_socket.send(public_key)
 
+        # print("Public Key en Client: ", public_key.hex())
+
+        # Receive the shared secret from the server
         cipher_key = client_socket.recv(4096)
+        # De-encapsulation of the shared secret received from the server (PQC Algorithm)
         self.shared_secret = client_kem.decap_secret(cipher_key)
 
         # print("Shared Secret Client: ", self.shared_secret.hex())
 
+        # AES-256 cipher
         self.cipher_client = aescipher.AESCipher(self.shared_secret.hex())
 
+        # Thread creation to run the send_message function
         send_thread = threading.Thread(target=self.send_message, args=(client_socket,))
         send_thread.start()
 

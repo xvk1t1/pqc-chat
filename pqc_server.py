@@ -88,7 +88,7 @@ class PQCServer:
         print(f"Client connected --> [{client_address[0]}:{client_address[1]}]")
         self.print_separator()
 
-        # Server PQC Key Encapsulation Mechanism
+        # Server PQC Key Exchange Mechanism
         server_kem = oqs.KeyEncapsulation(self.kem_alg)
 
         # Public key received from the client
@@ -96,13 +96,16 @@ class PQCServer:
 
         # print("Public Key en Server: ", public_key.hex())
 
+        # Encapsulation of the shared secret using the public key of the client (PQC Algorithm)
         cipher_key, self.shared_secret = server_kem.encap_secret(public_key)
         client_socket.send(cipher_key)
 
         # print("Shared Secret Server: ", self.shared_secret.hex())
 
+        # AES-256 cipher
         self.cipher_server = aescipher.AESCipher(self.shared_secret.hex())
 
+        # Thread creation to run the send_message function
         send_thread = threading.Thread(target=self.send_message, args=(client_socket,))
         send_thread.start()
 
