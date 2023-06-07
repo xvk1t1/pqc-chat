@@ -1,0 +1,10 @@
+.vscode/settings.json
+__pycache__/AESCipher.cpython-311.pyc
+__pycache__/aescipher.cpython-311.pyc
+__pycache__/oqs.cpython-311.pyc
+__pycache__/pqc_client.cpython-311.pyc
+__pycache__/pqc_colors.cpython-311.pyc
+__pycache__/pqc_server.cpython-311.pyc
+prueba_kem.py
+oqs.py.bak
+kem.py
