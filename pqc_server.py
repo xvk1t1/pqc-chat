@@ -7,12 +7,13 @@ import pqc_colors
 
 
 class PQCServer:
-    def __init__(self, ip, port, kem_alg):
+    def __init__(self, ip, port, kem_alg, verbose):
         self.ip = ip
         self.port = port
         self.kem_alg = kem_alg
         self.shared_secret = ""
         self.cipher_server = None
+        self.verbose = verbose
 
     def print_user_prompt(self):
         print(
@@ -30,6 +31,37 @@ class PQCServer:
 
     def print_client_disconnected(self, client_address):
         print(f"Client disconnected --> [{client_address[0]}:{client_address[1]}]")
+
+    def print_cryptographic_params(self, public_key, cipher_key):
+        self.print_separator()
+        print(
+            pqc_colors.PQCColors.BOLD
+            + "[PQC-KEM Algorithm]: "
+            + pqc_colors.PQCColors.RESET,
+            self.kem_alg,
+            "\n",
+        )
+        print(
+            pqc_colors.PQCColors.BOLD
+            + "[Client Public Key]: "
+            + pqc_colors.PQCColors.RESET,
+            public_key.hex(),
+            "\n",
+        )
+        print(
+            pqc_colors.PQCColors.BOLD
+            + "[Cipher Shared Secret]: "
+            + pqc_colors.PQCColors.RESET,
+            cipher_key.hex(),
+            "\n",
+        )
+        print(
+            pqc_colors.PQCColors.BOLD
+            + "[Shared Secret]: "
+            + pqc_colors.PQCColors.RESET,
+            self.shared_secret.hex(),
+        )
+        self.print_separator()
 
     # Function that handles the messages received from the client
     def receive_messages(self, client_socket, client_address):
@@ -94,13 +126,12 @@ class PQCServer:
         # Public key received from the client
         public_key = client_socket.recv(4096)
 
-        # print("Public Key en Server: ", public_key.hex())
-
         # Encapsulation of the shared secret using the public key of the client (PQC Algorithm)
         cipher_key, self.shared_secret = server_kem.encap_secret(public_key)
         client_socket.send(cipher_key)
 
-        # print("Shared Secret Server: ", self.shared_secret.hex())
+        if self.verbose:
+            self.print_cryptographic_params(public_key, cipher_key)
 
         # AES-256 cipher
         self.cipher_server = aescipher.AESCipher(self.shared_secret.hex())

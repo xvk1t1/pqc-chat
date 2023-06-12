@@ -7,15 +7,15 @@ import pqc_colors
 import pqc_server
 
 
-def server(ip, port, kem_alg):
+def server(ip, port, kem_alg, verbose):
     print("Starting server...")
-    server = pqc_server.PQCServer(ip, port, kem_alg)
+    server = pqc_server.PQCServer(ip, port, kem_alg, verbose)
     server.run_server()
 
 
-def client(ip, port, kem_alg):
+def client(ip, port, kem_alg, verbose):
     print("Starting client...")
-    client = pqc_client.PQCClient(ip, port, kem_alg)
+    client = pqc_client.PQCClient(ip, port, kem_alg, verbose)
     client.run_client()
 
 
@@ -67,12 +67,22 @@ def main():
     parser.add_argument(
         "-a",
         "--ip",
-        help="IP on wich the server will be deployed // IP that the client will try to connect to",
+        help="IP on which the server will be deployed // IP that the client will try to connect to [DEFAULT: 127.0.0.1]",
         default="127.0.0.1",
         type=validate_ip,
     )
     parser.add_argument(
-        "-p", "--port", help="Connection port", type=validate_port, default=12345
+        "-p",
+        "--port",
+        help="Connection port [DEFAULT: 12345]",
+        type=validate_port,
+        default=12345,
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        help="Print cryptographic parameters [DEFAULT: False]",
+        action="store_true",
     )
 
     args = parser.parse_args()
@@ -80,9 +90,9 @@ def main():
     kem_alg = "Kyber1024"
 
     if args.mode == "server":
-        server(args.ip, args.port, kem_alg)
+        server(args.ip, args.port, kem_alg, args.verbose)
     elif args.mode == "client":
-        client(args.ip, args.port, kem_alg)
+        client(args.ip, args.port, kem_alg, args.verbose)
 
     print("Chat session finished, bye!")
     os._exit(0)

@@ -7,12 +7,13 @@ import pqc_colors
 
 
 class PQCClient:
-    def __init__(self, server_ip, server_port, kem_alg):
+    def __init__(self, server_ip, server_port, kem_alg, verbose):
         self.server_ip = server_ip
         self.server_port = server_port
         self.kem_alg = kem_alg
         self.shared_secret = ""
         self.cipher_client = None
+        self.verbose = verbose
 
     def clean_user_prompt(self):
         for _ in range(15):
@@ -20,6 +21,40 @@ class PQCClient:
 
     def print_separator(self):
         print("================================================")
+
+    def print_server_disconnected(self):
+        print(f"Server disconnected --> [{self.server_ip}:{self.server_port}]")
+
+    def print_cryptographic_params(self, public_key, cipher_key):
+        self.print_separator()
+        print(
+            pqc_colors.PQCColors.BOLD
+            + "[PQC-KEM Algorithm]: "
+            + pqc_colors.PQCColors.RESET,
+            self.kem_alg,
+            "\n",
+        )
+        print(
+            pqc_colors.PQCColors.BOLD
+            + "[Client Public Key]: "
+            + pqc_colors.PQCColors.RESET,
+            public_key.hex(),
+            "\n",
+        )
+        print(
+            pqc_colors.PQCColors.BOLD
+            + "[Cipher Shared Secret]: "
+            + pqc_colors.PQCColors.RESET,
+            cipher_key.hex(),
+            "\n",
+        )
+        print(
+            pqc_colors.PQCColors.BOLD
+            + "[Shared Secret]: "
+            + pqc_colors.PQCColors.RESET,
+            self.shared_secret.hex(),
+        )
+        self.print_separator()
 
     # Function that handles the messages received from the server
     def receive_messages(self, client_socket):
@@ -43,16 +78,12 @@ class PQCClient:
                     if message.lower() == "bye":
                         self.clean_user_prompt()
                         self.print_separator()
-                        print(
-                            f"Server disconnected --> [{self.server_ip}:{self.server_port}]"
-                        )
+                        self.print_server_disconnected()
                         break
                 else:
                     self.clean_user_prompt()
                     self.print_separator()
-                    print(
-                        f"Server disconnected --> [{self.server_ip}:{self.server_port}]"
-                    )
+                    self.print_server_disconnected()
                     break
 
             except ConnectionResetError:
@@ -93,14 +124,13 @@ class PQCClient:
         public_key = client_kem.generate_keypair()
         client_socket.send(public_key)
 
-        # print("Public Key en Client: ", public_key.hex())
-
         # Receive the shared secret from the server
         cipher_key = client_socket.recv(4096)
         # De-encapsulation of the shared secret received from the server (PQC Algorithm)
         self.shared_secret = client_kem.decap_secret(cipher_key)
 
-        # print("Shared Secret Client: ", self.shared_secret.hex())
+        if self.verbose:
+            self.print_cryptographic_params(public_key, cipher_key)
 
         # AES-256 cipher
         self.cipher_client = aescipher.AESCipher(self.shared_secret.hex())
