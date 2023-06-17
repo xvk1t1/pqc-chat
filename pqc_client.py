@@ -15,8 +15,17 @@ class PQCClient:
         self.cipher_client = None
         self.verbose = verbose
 
+    def print_user_prompt(self):
+        print(
+            pqc_colors.PQCColors.GREEN
+            + "[Your message]: "
+            + pqc_colors.PQCColors.RESET,
+            end="",
+            flush=True,
+        )
+
     def clean_user_prompt(self):
-        for _ in range(15):
+        for _ in range(16):
             print("\b", end="")
 
     def print_separator(self):
@@ -67,13 +76,7 @@ class PQCClient:
                     print(
                         f"{pqc_colors.PQCColors.MAGENTA}[{self.server_ip}:{self.server_port}]:{pqc_colors.PQCColors.RESET} {message}"
                     )
-                    print(
-                        pqc_colors.PQCColors.GREEN
-                        + "[Your message]:"
-                        + pqc_colors.PQCColors.RESET,
-                        end="",
-                        flush=True,
-                    )
+                    self.print_user_prompt()
 
                     if message.lower() == "bye":
                         self.clean_user_prompt()
@@ -99,13 +102,7 @@ class PQCClient:
     # Function used to send messages to the server
     def send_message(self, client_socket):
         while True:
-            print(
-                pqc_colors.PQCColors.GREEN
-                + "[Your message]:"
-                + pqc_colors.PQCColors.RESET,
-                end="",
-                flush=True,
-            )
+            self.print_user_prompt()
             message = input()
             cipher_text = self.cipher_client.encrypt(message)
             client_socket.send(cipher_text)

@@ -17,13 +17,13 @@ class PQCServer:
 
     def print_user_prompt(self):
         print(
-            pqc_colors.PQCColors.GREEN + "[Your message]:" + pqc_colors.PQCColors.RESET,
+            pqc_colors.PQCColors.GREEN + "[Your message]: " + pqc_colors.PQCColors.RESET,
             end="",
             flush=True,
         )
 
     def clean_user_prompt(self):
-        for _ in range(15):
+        for _ in range(16):
             print("\b", end="")
 
     def print_separator(self):
