@@ -1,3 +1,5 @@
+<a name="readme-top"></a>
+
 <h1 align="center">PQC-Chat</h1>
 
 <!-- ABOUT THE PROJECT -->
